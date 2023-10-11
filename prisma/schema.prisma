@@ -1,0 +1,29 @@
+datasource db {
+    provider = "mongodb"
+    url = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model User {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    username String @unique
+    password String
+    posts Post[]
+}
+
+model Session {
+    id String @id @map("_id") @db.ObjectId
+    token String @unique
+}
+
+model Post {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    title String @unique
+    content String
+    tags String[]
+    author User @relation(fields: [authorId], references: [id])
+    authorId String @db.ObjectId
+}

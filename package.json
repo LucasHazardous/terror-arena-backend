@@ -1,0 +1,22 @@
+{
+  "name": "terror-arena-backend",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run --watch ./src/index.ts",
+    "pgenerate": "prisma generate",
+    "pmigrate": "prisma db push"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.9.3",
+    "@prisma/client": "^5.3.1",
+    "graphql": "^16.8.1",
+    "prisma": "^5.3.1"
+  }
+}
