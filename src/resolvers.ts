@@ -1,5 +1,5 @@
 import prisma from "./db";
-import { IPost, ISession, IUser } from "./schema";
+import { IPost, ISession, IUser, UserRole } from "./schema";
 
 interface ILoginData {
     credentials: {
@@ -32,6 +32,10 @@ async function getToken(token: string): Promise<ISession | null> {
             token: token
         }
     });
+}
+
+function hasAtLeastOneRole(userRoles: string[], requiredRoles: UserRole[]): boolean {
+    return requiredRoles.some(role => userRoles.includes(role));
 }
 
 export const resolvers = {
@@ -83,6 +87,8 @@ export const resolvers = {
                 }
             });
 
+            if(!hasAtLeastOneRole(user!.roles, [UserRole.Admin, UserRole.Creator])) return;
+            
             const createdPost = await prisma.post.create({
                 data: {
                     authorId: user!.id,
@@ -96,6 +102,14 @@ export const resolvers = {
             const token = await getToken(args.token);
 
             if(!token) return;
+
+            const user = await prisma.user.findFirst({
+                where: {
+                    id: token.id
+                }
+            });
+
+            if(!hasAtLeastOneRole(user!.roles, [UserRole.Admin])) return;
 
             const post = await prisma.post.delete({
                 where: {

@@ -3,6 +3,7 @@ const typeDefs = `#graphql
         id: ID!,
         username: String!,
         password: String!,
+        roles: [String!]!,
         posts: [Post!]!
     }
 
@@ -45,6 +46,7 @@ const typeDefs = `#graphql
 interface IUser {
     id: string,
     username: string,
+    roles: string[],
     password: string
 }
 
@@ -61,9 +63,16 @@ interface IPost {
     authorId: string
 }
 
+enum UserRole {
+    Admin = "admin",
+    Creator = "creator",
+    Commentator = "commentator"
+}
+
 export {
     typeDefs,
     IUser,
     ISession,
-    IPost
+    IPost,
+    UserRole
 };
