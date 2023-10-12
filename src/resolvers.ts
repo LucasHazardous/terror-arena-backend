@@ -1,4 +1,4 @@
-import { page_limit_count } from "./config";
+import { page_limit } from "./config";
 import prisma from "./db";
 import { IPost, ISession, IUser, UserRole } from "./schema";
 
@@ -57,8 +57,8 @@ export const resolvers = {
                 orderBy: {
                     id: "desc"
                 },
-                skip: args.page * page_limit_count,
-                take: page_limit_count
+                skip: args.page * page_limit,
+                take: page_limit
             });
         }
     },
@@ -152,8 +152,8 @@ export const resolvers = {
                 orderBy: {
                     id: "desc"
                 },
-                skip: args.page * page_limit_count,
-                take: page_limit_count
+                skip: args.page * page_limit,
+                take: page_limit
             });
         }
     }
