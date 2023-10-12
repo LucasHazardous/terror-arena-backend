@@ -40,15 +40,24 @@ function hasAtLeastOneRole(userRoles: string[], requiredRoles: UserRole[]): bool
 
 export const resolvers = {
     Query: {
+        async post(_: any, args: ISearchId) {
+            return await prisma.post.findFirst({
+                where: {
+                    id: args.id
+                }
+            });
+        }
+    },
+    Mutation: {
         async login(_: any, args: ILoginData) {
+            console.log(args.credentials)
             const user = await prisma.user.findFirst({
                 where: {
-                    username: args.credentials.username,
-                    password: args.credentials.password
+                    username: args.credentials.username
                 }
             });
 
-            if(!user) return;
+            if(!user || !Bun.password.verifySync(args.credentials.password, user.password)) return;
             
             const token = await Bun.password.hash(Date.now() + args.credentials.username);
 
@@ -67,15 +76,6 @@ export const resolvers = {
 
             return session;
         },
-        async post(_: any, args: ISearchId) {
-            return await prisma.post.findFirst({
-                where: {
-                    id: args.id
-                }
-            });
-        }
-    },
-    Mutation: {
         async createPost(_: any, args: IPostData) {
             const token = await getToken(args.token);
 

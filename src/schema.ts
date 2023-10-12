@@ -20,13 +20,13 @@ const typeDefs = `#graphql
         author: User!
     }
 
-    type Query {
-        login(credentials: LoginInput): Session,
-        
+    type Query {        
         post(id: ID!): Post
     }
 
     type Mutation {
+        login(credentials: LoginInput): Session,
+
         createPost(post: PostInput!, token: String!): Post,
         deletePost(id: ID!, token: String!): ID
     }
