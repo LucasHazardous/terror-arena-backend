@@ -20,7 +20,7 @@ const typeDefs = `#graphql
         author: User!
     }
 
-    type Query {        
+    type Query {
         post(id: ID!): Post,
 
         posts(page: Int!): [Post]
@@ -29,19 +29,23 @@ const typeDefs = `#graphql
     type Mutation {
         login(credentials: LoginInput): Session,
 
-        createPost(post: PostInput!, token: String!): Post,
-        deletePost(id: ID!, token: String!): ID
+        createPost(post: PostInput!, session: SessionInput!): Post,
+        deletePost(id: ID!, session: SessionInput!): ID
     }
 
     input PostInput {
-        title: String!,
-        content: String!,
-        tags: [String!]!
+        title: String! @constraint(minLength: 4, maxLength: 40),
+        content: String! @constraint(minLength: 100, maxLength: 2000),,
+        tags: [String!]! @constraint(pattern: "^[a-z]*$", minLength: 3, maxLength: 20)
     }
 
     input LoginInput {
-        username: String!,
-        password: String!
+        username: String! @constraint(pattern: "^[a-z]*$", minLength: 4, maxLength: 20),
+        password: String! @constraint(pattern: "^[A-Za-z0-9]*$", minLength: 4, maxLength: 20)
+    }
+
+    input SessionInput {
+        token: String! @constraint(minLength: 118, maxLength: 118)
     }
 `;
 

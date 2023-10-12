@@ -8,10 +8,16 @@ import express, { json } from "express";
 import cors from "cors";
 import { expressMiddleware } from "@apollo/server/express4";
 import depthLimit from 'graphql-depth-limit';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { constraintDirective, constraintDirectiveTypeDefs } from 'graphql-constraint-directive';
+
+let schema = makeExecutableSchema({ typeDefs: [
+    constraintDirectiveTypeDefs, typeDefs
+], resolvers});
+schema = constraintDirective()(schema);
 
 const server = new ApolloServer({
-    typeDefs,
-    resolvers,
+    schema: schema,
     validationRules: [ depthLimit(depth_limit) ]
 });
 

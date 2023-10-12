@@ -15,7 +15,9 @@ interface ISearchId {
 
 interface IDeleteId {
     id: string,
-    token: string
+    session: {
+        token: string
+    }
 }
 
 interface IPostData {
@@ -24,7 +26,9 @@ interface IPostData {
         content: string,
         tags: string[]
     },
-    token: string
+    session: {
+        token: string
+    }
 }
 
 interface IPagination {
@@ -53,6 +57,8 @@ export const resolvers = {
             });
         },
         async posts(_: any, args: IPagination) {
+            if (Number(args.page) < 0) return;
+
             return await prisma.post.findMany({
                 orderBy: {
                     id: "desc"
@@ -64,7 +70,6 @@ export const resolvers = {
     },
     Mutation: {
         async login(_: any, args: ILoginData) {
-            console.log(args.credentials)
             const user = await prisma.user.findFirst({
                 where: {
                     username: args.credentials.username
@@ -91,7 +96,7 @@ export const resolvers = {
             return session;
         },
         async createPost(_: any, args: IPostData) {
-            const token = await getToken(args.token);
+            const token = await getToken(args.session.token);
 
             if(!token) return;
             
@@ -113,7 +118,7 @@ export const resolvers = {
             return createdPost;
         },
         async deletePost(_: any, args: IDeleteId): Promise<String | undefined> {
-            const token = await getToken(args.token);
+            const token = await getToken(args.session.token);
 
             if(!token) return;
 
