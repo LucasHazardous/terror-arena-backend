@@ -1,3 +1,4 @@
+import { page_limit_count } from "./config";
 import prisma from "./db";
 import { IPost, ISession, IUser, UserRole } from "./schema";
 
@@ -26,6 +27,10 @@ interface IPostData {
     token: string
 }
 
+interface IPagination {
+    page: number
+}
+
 async function getToken(token: string): Promise<ISession | null> {
     return await prisma.session.findFirst({
         where: {
@@ -45,6 +50,15 @@ export const resolvers = {
                 where: {
                     id: args.id
                 }
+            });
+        },
+        async posts(_: any, args: IPagination) {
+            return await prisma.post.findMany({
+                orderBy: {
+                    id: "desc"
+                },
+                skip: args.page * page_limit_count,
+                take: page_limit_count
             });
         }
     },
@@ -130,7 +144,7 @@ export const resolvers = {
         }
     },
     User: {
-        async posts(parent: IUser): Promise<IPost[] | null> {
+        async posts(parent: IUser, args: IPagination): Promise<IPost[] | null> {
             return await prisma.post.findMany({
                 where: {
                     authorId: parent.id

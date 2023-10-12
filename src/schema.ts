@@ -4,7 +4,7 @@ const typeDefs = `#graphql
         username: String!,
         password: String!,
         roles: [String!]!,
-        posts: [Post!]!
+        posts(page: Int!): [Post!]!
     }
 
     type Session {
@@ -21,7 +21,9 @@ const typeDefs = `#graphql
     }
 
     type Query {        
-        post(id: ID!): Post
+        post(id: ID!): Post,
+
+        posts(page: Int!): [Post]
     }
 
     type Mutation {
