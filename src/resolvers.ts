@@ -148,7 +148,12 @@ export const resolvers = {
             return await prisma.post.findMany({
                 where: {
                     authorId: parent.id
-                }
+                },
+                orderBy: {
+                    id: "desc"
+                },
+                skip: args.page * page_limit_count,
+                take: page_limit_count
             });
         }
     }
