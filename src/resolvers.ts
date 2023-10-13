@@ -1,6 +1,6 @@
 import { page_limit } from "./config";
 import prisma from "./db";
-import { IPost, ISession, IUser, UserRole } from "./schema";
+import { IComment, IPost, ISession, IUser, UserRole } from "./schema";
 
 interface ILoginData {
     credentials: {
@@ -11,6 +11,10 @@ interface ILoginData {
 
 interface ISearchId {
     id: string
+}
+
+interface IAuthorId {
+    authorId: string
 }
 
 interface IDeleteId {
@@ -145,13 +149,8 @@ export const resolvers = {
         }
     },
     Post: {
-        async author(parent: IPost): Promise<IUser | null> {
-            return await prisma.user.findFirst({
-                where: {
-                    id: parent.authorId
-                }
-            });
-        }
+        author,
+        comments
     },
     User: {
         async posts(parent: IUser, args: IPagination): Promise<IPost[] | null> {
@@ -165,9 +164,34 @@ export const resolvers = {
                 skip: args.page * page_limit,
                 take: page_limit
             });
-        }
+        },
+        comments
+    },
+    Comment: {
+        author
     }
 };
+
+async function author(parent: IAuthorId): Promise<IUser | null> {
+    return await prisma.user.findFirst({
+        where: {
+            id: parent.authorId
+        }
+    });
+}
+
+async function comments(parent: ISearchId, args: IPagination): Promise<IComment[] | null> {
+    return await prisma.comment.findMany({
+        where: {
+            postId: parent.id
+        },
+        orderBy: {
+            id: "desc"
+        },
+        take: page_limit,
+        skip: args.page * page_limit
+    })
+}
 
 async function getUserWithRoles(token: string, roles: UserRole[]): Promise<IUser | undefined> {
     const tokenObject = await getToken(token);

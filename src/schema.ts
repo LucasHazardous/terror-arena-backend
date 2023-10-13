@@ -4,7 +4,8 @@ const typeDefs = `#graphql
         username: String!,
         password: String!,
         roles: [String!]!,
-        posts(page: Int!): [Post!]!
+        posts(page: Int!): [Post!]!,
+        comments(page: Int!): [Comment!]!
     }
 
     type Session {
@@ -17,13 +18,13 @@ const typeDefs = `#graphql
         title: String!,
         content: String!,
         tags: [String!]!,
-        author: User!
+        author: User!,
+        comments(page: Int!): [Comment!]!
     }
 
     type Comment {
         id: ID!,
         content: String!,
-        post: Post!,
         author: User!
     }
 
@@ -85,6 +86,13 @@ interface IPost {
     authorId: string
 }
 
+interface IComment {
+    id: string,
+    content: string,
+    authorId: string,
+    postId: string
+}
+
 enum UserRole {
     Admin = "admin",
     Creator = "creator",
@@ -96,5 +104,6 @@ export {
     IUser,
     ISession,
     IPost,
+    IComment,
     UserRole
 };
