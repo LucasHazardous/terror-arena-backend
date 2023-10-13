@@ -20,22 +20,33 @@ const typeDefs = `#graphql
         author: User!
     }
 
+    type Comment {
+        id: ID!,
+        content: String!,
+        post: Post!,
+        author: User!
+    }
+
     type Query {
         post(id: ID!): Post,
 
-        posts(page: Int!): [Post]
+        posts(page: Int!): [Post],
+
+        comments(postId: ID!, page: Int!): [Comment]
     }
 
     type Mutation {
         login(credentials: LoginInput): Session,
 
         createPost(post: PostInput!, session: SessionInput!): Post,
-        deletePost(id: ID!, session: SessionInput!): ID
+        deletePost(id: ID!, session: SessionInput!): ID,
+
+        createComment(comment: CommentInput!, session: SessionInput!): Comment
     }
 
     input PostInput {
         title: String! @constraint(minLength: 4, maxLength: 40),
-        content: String! @constraint(minLength: 100, maxLength: 2000),,
+        content: String! @constraint(minLength: 100, maxLength: 2000),
         tags: [String!]! @constraint(pattern: "^[a-z]*$", minLength: 3, maxLength: 20)
     }
 
@@ -46,6 +57,11 @@ const typeDefs = `#graphql
 
     input SessionInput {
         token: String! @constraint(minLength: 118, maxLength: 118)
+    }
+
+    input CommentInput {
+        content: String! @constraint(minLength: 20, maxLength: 500),
+        postId: ID!
     }
 `;
 
