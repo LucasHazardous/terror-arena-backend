@@ -31,20 +31,18 @@ interface IPostData {
     }
 }
 
+interface ICommentData {
+    comment: {
+        postId: string,
+        content: string
+    },
+    session: {
+        token: string
+    }
+}
+
 interface IPagination {
     page: number
-}
-
-async function getToken(token: string): Promise<ISession | null> {
-    return await prisma.session.findFirst({
-        where: {
-            token: token
-        }
-    });
-}
-
-function hasAtLeastOneRole(userRoles: string[], requiredRoles: UserRole[]): boolean {
-    return requiredRoles.some(role => userRoles.includes(role));
 }
 
 export const resolvers = {
@@ -96,17 +94,12 @@ export const resolvers = {
             return session;
         },
         async createPost(_: any, args: IPostData) {
-            const token = await getToken(args.session.token);
+            const user = await getUserWithRoles(
+                args.session.token, 
+                [UserRole.Creator, UserRole.Admin]
+            );
 
-            if(!token) return;
-            
-            const user = await prisma.user.findFirst({
-                where: {
-                    id: token.id
-                }
-            });
-
-            if(!hasAtLeastOneRole(user!.roles, [UserRole.Admin, UserRole.Creator])) return;
+            if(!user) return;
             
             const createdPost = await prisma.post.create({
                 data: {
@@ -118,17 +111,12 @@ export const resolvers = {
             return createdPost;
         },
         async deletePost(_: any, args: IDeleteId): Promise<String | undefined> {
-            const token = await getToken(args.session.token);
+            const user = await getUserWithRoles(
+                args.session.token, 
+                [UserRole.Admin]
+            );
 
-            if(!token) return;
-
-            const user = await prisma.user.findFirst({
-                where: {
-                    id: token.id
-                }
-            });
-
-            if(!hasAtLeastOneRole(user!.roles, [UserRole.Admin])) return;
+            if(!user) return;
 
             const post = await prisma.post.delete({
                 where: {
@@ -137,6 +125,23 @@ export const resolvers = {
             });
 
             return post.id;
+        },
+        async createComment(_: any, args: ICommentData) {
+            const user = await getUserWithRoles(
+                args.session.token, 
+                [UserRole.Commentator, UserRole.Admin]
+            );
+
+            if(!user) return;
+
+            const comment = await prisma.comment.create({
+                data: {
+                    ...args.comment,
+                    authorId: user!.id
+                }
+            });
+
+            return comment;
         }
     },
     Post: {
@@ -163,3 +168,31 @@ export const resolvers = {
         }
     }
 };
+
+async function getUserWithRoles(token: string, roles: UserRole[]): Promise<IUser | undefined> {
+    const tokenObject = await getToken(token);
+
+    if(!tokenObject) return;
+
+    const user = await prisma.user.findFirst({
+        where: {
+            id: tokenObject.id
+        }
+    });
+
+    if(!hasAtLeastOneRole(user!.roles, roles)) return;
+
+    return user!;
+}
+
+function hasAtLeastOneRole(userRoles: string[], requiredRoles: UserRole[]): boolean {
+    return requiredRoles.some(role => userRoles.includes(role));
+}
+
+async function getToken(token: string): Promise<ISession | null> {
+    return await prisma.session.findFirst({
+        where: {
+            token: token
+        }
+    });
+}
